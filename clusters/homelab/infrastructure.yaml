@@ -15,16 +15,24 @@ spec:
   prune: true
   wait: true
   patches:
+    # - patch: |-
+    #     apiVersion: helm.toolkit.fluxcd.io/v2
+    #     kind: HelmRelease
+    #     metadata:
+    #       name: nfs-provisioner
+    #       namespace: nfs-provisioner
+    #     spec:
+    #       values:
+    #         nfs:
+    #           path: /volume1/homelab-nfs
+    #   target:
+    #     kind: HelmRelease
+    #     name: nfs-provisioner
+    #     namespace: nfs-provisioner
     - patch: |-
-        apiVersion: helm.toolkit.fluxcd.io/v2
-        kind: HelmRelease
-        metadata:
-          name: nfs-provisioner
-          namespace: nfs-provisioner
-        spec:
-          values:
-            nfs:
-              path: /volume1/homelab-nfs
+        - op: replace
+          path: /spec/values/nfs/path
+          value: /volume1/homelab-nfs
       target:
         kind: HelmRelease
         name: nfs-provisioner
