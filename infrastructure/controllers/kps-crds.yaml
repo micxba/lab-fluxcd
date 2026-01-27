@@ -1,0 +1,36 @@
+# This deployment is a little bit of a one-off, it's technically not a controller but many other releases have CRD resources that depends on this
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: kps-crds
+  namespace: monitoring
+spec:
+  interval: 24h
+  url: https://prometheus-community.github.io/helm-charts
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kps-crds
+  namespace: monitoring
+spec:
+  interval: 15m
+  timeout: 5m
+  chart:
+    spec:
+      chart: prometheus-operator-crds
+      version: "*"
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-operator-crds
+      interval: 5m
+  values:
+    speaker:
+      frr:
+        enabled: false
