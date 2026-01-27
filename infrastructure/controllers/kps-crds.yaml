@@ -3,6 +3,9 @@
 apiVersion: v1
 kind: Namespace
 metadata:
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/warn: privileged
   name: monitoring
 ---
 apiVersion: source.toolkit.fluxcd.io/v1
@@ -29,8 +32,8 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: prometheus-community
-      interval: 5m
-  values:
-    speaker:
-      frr:
-        enabled: false
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
+
