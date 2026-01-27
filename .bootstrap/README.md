@@ -22,6 +22,7 @@ flux create secret git flux-gitlab \
 ## Create an instance
 
 ```bash
+kubectl apply -f - <<EOF
 apiVersion: fluxcd.controlplane.io/v1
 kind: FluxInstance
 metadata:
@@ -50,8 +51,15 @@ spec:
     interval: 1m
     kind: GitRepository
     path: clusters/homelab
-    pullSecret: flux-gitlab
+    pullSecret: flux-github
     ref: refs/heads/main
     url: ssh://git@github.com/micxba/lab-fluxcd
   wait: true
+EOF
+```
+
+## Check
+
+```bash
+kubectl -n flux-system port-forward svc/flux-operator 9080:9080
 ```
