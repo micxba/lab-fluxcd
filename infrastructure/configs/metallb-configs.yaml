@@ -9,3 +9,12 @@ spec:
     - 192.168.0.211/32
     - 192.168.0.212/32
   autoAssign: true
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: default
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+    - default-pool
