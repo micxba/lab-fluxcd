@@ -8,7 +8,7 @@ metadata:
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
-  name: kps-crds
+  name: prometheus-community
   namespace: monitoring
 spec:
   interval: 24h
@@ -28,7 +28,7 @@ spec:
       version: "*"
       sourceRef:
         kind: HelmRepository
-        name: prometheus-operator-crds
+        name: prometheus-community
       interval: 5m
   values:
     speaker:
