@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - metallb.yaml
   - kps-crds.yaml
+  - nfs-provisioner.yaml
