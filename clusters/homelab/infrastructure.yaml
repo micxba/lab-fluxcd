@@ -31,4 +31,18 @@ spec:
     name: infrastructure
   path: ./configs
   prune: true
-  patches: {}
+  patches:
+    - patch: |-
+        apiVersion: metallb.io/v1beta1
+        kind: IPAddressPool
+        metadata:
+          name: default-pool
+          namespace: metallb-system
+        spec:
+          addresses:
+            - 192.168.0.211/32
+            - 192.168.0.212/32
+      target:
+        kind: IPAddressPool
+        name: default-pool
+        namespace: metallb-system
