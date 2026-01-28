@@ -2,6 +2,8 @@
 
 Taken from: [flux-operator](https://github.com/controlplaneio-fluxcd/flux-operator)
 
+> Even though Cilium is part of this repo, it really needs to be manually bootstrapped before anything else, otherwise you won't be able to install the Operator.
+
 ## Install the Operator
 
 ```bash
