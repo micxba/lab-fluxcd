@@ -39,6 +39,8 @@ spec:
       autoMount:
         enabled: false
       hostRoot: /sys/fs/cgroup
+    nodePort:
+      enabled: true
     gatewayAPI:
       enableAlpn: true
       enableAppProtocol: true
