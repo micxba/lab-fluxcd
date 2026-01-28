@@ -41,15 +41,15 @@ spec:
       hostRoot: /sys/fs/cgroup
     nodePort:
       enabled: true
-    # ingressController:
-    #   enabled: true
-    #   default: true
-    #   loadbalancerMode: shared
-    #   defaultSecretNamespace: cert-manager
-    #   defaultSecretName: wildcard
-    #   service:
-    #     annotations:
-    #       metallb.io/loadBalancerIPs: 10.0.101.254
+    ingressController:
+      enabled: true
+      default: true
+      loadbalancerMode: shared
+      # defaultSecretNamespace: cert-manager
+      # defaultSecretName: wildcard
+      service:
+        annotations:
+          metallb.io/loadBalancerIPs: 192.168.0.212 #TODO: Move to override
     gatewayAPI:
       enableAlpn: true
       enableAppProtocol: true
