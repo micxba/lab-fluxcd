@@ -28,7 +28,7 @@ spec:
   timeout: 5m
   chart:
     spec:
-      chart: metallb
+      chart: cilium
       version: "1.18.6"
       sourceRef:
         kind: HelmRepository
