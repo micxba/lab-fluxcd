@@ -5,4 +5,5 @@ resources:
   - metallb.yaml
   - kps-crds.yaml
   - nfs-provisioner.yaml
+  - cert-manager.yaml
   - ./gateway
