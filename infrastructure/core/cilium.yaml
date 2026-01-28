@@ -41,10 +41,22 @@ spec:
       hostRoot: /sys/fs/cgroup
     nodePort:
       enabled: true
+    # ingressController:
+    #   enabled: true
+    #   default: true
+    #   loadbalancerMode: shared
+    #   defaultSecretNamespace: cert-manager
+    #   defaultSecretName: wildcard
+    #   service:
+    #     annotations:
+    #       metallb.io/loadBalancerIPs: 10.0.101.254
     gatewayAPI:
       enableAlpn: true
       enableAppProtocol: true
       enabled: true
+    encryption:
+      enabled: true
+      type: wireguard
     ipam:
       mode: kubernetes
     kubeProxyReplacement: false
@@ -66,5 +78,40 @@ spec:
         - NET_ADMIN
         - SYS_ADMIN
         - SYS_RESOURCE
-
-  
+    prometheus:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+        labels:
+          release: kps
+    # dashboards:
+    #   enabled: true
+    #   annotations:
+    #     grafana_folder: Cilium
+    envoy:
+      # resources:
+      #   limits:
+      #     memory: 128Mi
+      #   requests:
+      #     memory: 128Mi
+      prometheus:
+        serviceMonitor:
+          enabled: true
+          labels:
+            release: kps
+    operator:
+      replicas: 1
+      # resources:
+      #   limits:
+      #     memory: 256Mi
+      #   requests:
+      #     memory: 256Mi
+      # prometheus:
+      #   serviceMonitor:
+      #     enabled: true
+      #     labels:
+      #       release: kps
+      # dashboards:
+      #   enabled: true
+      #   annotations:
+      #     grafana_folder: Cilium
