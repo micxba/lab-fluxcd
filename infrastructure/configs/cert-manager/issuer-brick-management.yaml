@@ -1,0 +1,33 @@
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-brick-management-issuer
+  namespace: cert-manager
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: bane@sith.network
+    privateKeySecretRef:
+      name: letsencrypt-ct-teamworx-com-pk
+    solvers:
+      - dns01:
+          cloudflare:
+            apiTokenSecretRef:
+              name: cloudflare-api-token-secret
+              key: CLOUDFLARE_API_KEY
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-brick-management
+  namespace: cert-manager
+spec:
+  secretName: wildcard-brick-management
+  issuerRef:
+    name: letsencrypt-brick-management-issuer
+    kind: ClusterIssuer
+  commonName: "*.brick.management"
+  dnsNames:
+    - "*.brick.management"
+    - "brick.management"
