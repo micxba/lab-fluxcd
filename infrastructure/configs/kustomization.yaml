@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - metallb-configs.yaml
   - bitwarden-secret-store.yaml
+  - ./cert-manager/
