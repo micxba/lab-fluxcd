@@ -1,0 +1,219 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    toolkit.fluxcd.io/tenant: workloads
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/warn: privileged
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: kps
+  namespace: kps
+spec:
+  interval: 24h
+  url: https://prometheus-community.github.io/helm-charts
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kps
+  namespace: monitoring
+spec:
+  interval: 15m
+  timeout: 5m
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      version: "*"
+      sourceRef:
+        kind: HelmRepository
+        name: kps
+      interval: 15m
+  values:
+    nameOverride: "kps"
+    namespaceOverride: "monitoring"
+    crds:
+      enabled: false
+    # alertmanager:
+    #   config:
+    #     route:
+    #       group_by: ['job']
+    #       receiver: 'pushover'
+    #       routes:
+    #         - matchers:
+    #             - alertname = "Watchdog"
+    #           receiver: 'null'
+    #         - matchers:
+    #             - alertname = "NodeDiskIOSaturation"
+    #           receiver: 'null'
+    #         - matchers:
+    #             - alertname = "KubePodNotReady"
+    #             - namespace = "workflows"
+    #           receiver: 'null'
+    #     receivers:
+    #       - name: 'pushover'
+    #         pushover_configs:
+    #           - user_key_file: /etc/alertmanager/secrets/pushover-secret/token
+    #             token_file: /etc/alertmanager/secrets/pushover-secret/homelab-apikey
+    #             title: '{{ .Status | toUpper }}{{ if .CommonAnnotations.summary }}: {{ .CommonAnnotations.summary }}{{ else }}: {{ .CommonLabels.alertname }}{{ end }}'
+    #             message: |-
+    #               🔥 Severity: {{ if .CommonLabels.severity }}{{ .CommonLabels.severity }}{{ else }}unknown{{ end }}
+    #               📝 Description: {{ if .CommonAnnotations.description }}{{ .CommonAnnotations.description }}{{ else if .CommonAnnotations.summary }}{{ .CommonAnnotations.summary }}{{ else }}No description{{ end }}
+    #               📛 Alert: {{ .CommonLabels.alertname }}
+    #               {{- if .CommonLabels.container }}
+    #               📦 Container: {{ .CommonLabels.container }}
+    #               {{- end }}
+    #               {{- if .CommonLabels.controller }}
+    #               🛠️ Controller: {{ .CommonLabels.controller }}
+    #               {{- end }}
+    #               🖥️ Instance: {{ .CommonLabels.instance }}
+    #               {{- if .CommonLabels.namespace }}
+    #               📂 Namespace: {{ .CommonLabels.namespace }}
+    #               {{- end }}
+    #               🚦 Status: {{ .Status }}
+    #               👉 [View in Grafana](https://grafana.sith.network)
+    #       - name: 'null'
+    #   templateFiles:
+    #     template_1.tmpl: |-
+    #       {{ define "__alertmanager" }}Alertmanager{{ end }}
+    #   ingress:
+    #     enabled: true
+    #     annotations:
+    #       nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    #       # external-dns.alpha.kubernetes.io/target: "ruleof3-k8s.sith.network"
+    #     hosts:
+    #       - alertmanager.sith.network
+    #     paths:
+    #       - /
+    #     tls:
+    #       - secretName: wildcard-sith-network
+    #         hosts:
+    #           - alertmanager.sith.network
+    #   alertmanagerSpec:
+    #     secrets:
+    #       - pushover-secret
+    grafana:
+      namespaceOverride: "monitoring"
+      defaultDashboardsEnabled: false
+      ingress:
+        enabled: true
+        annotations:
+          nginx.ingress.kubernetes.io/ssl-redirect: "true"
+          # external-dns.alpha.kubernetes.io/target: "ruleof3-k8s.sith.network"
+        hosts:
+          - grafana.sith.network
+        path: /
+        tls:
+          - secretName: wildcard-sith-network
+            hosts:
+              - grafana.sith.network
+      persistence:
+        type: pvc
+        enabled: true
+        accessModes:
+          - ReadWriteOnce
+        size: 20Gi
+        finalizers:
+          - kubernetes.io/pvc-protection
+      grafana.ini:
+        enable_gzip: true
+        auth.anonymous:
+          enabled: true
+        # auth.ldap:
+        #   enabled: true
+        #   config_file: /etc/grafana/ldap.toml
+        dataproxy:
+          timeout: 300
+      # ldap:
+      #   enabled: true
+      #   existingSecret: "grafana-ldap"
+      dashboardProviders:
+        dashboardproviders.yaml:
+          apiVersion: 1
+          providers:
+          - name: 'grafana-dashboards-kubernetes'
+            orgId: 1
+            folder: 'Kubernetes'
+            type: file
+            disableDeletion: true
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/grafana-dashboards-kubernetes
+      dashboards:
+        grafana-dashboards-kubernetes:
+          k8s-system-api-server:
+            url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-system-api-server.json
+            token: ''
+          k8s-system-coredns:
+            url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-system-coredns.json
+            token: ''
+          k8s-views-global:
+            url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-global.json
+            token: ''
+          k8s-views-namespaces:
+            url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-namespaces.json
+            token: ''
+          k8s-views-nodes:
+            url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-nodes.json
+            token: ''
+          k8s-views-pods:
+            url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-pods.json
+            token: ''
+    kubeControllerManager:
+      service:
+        selector:
+          k8s-app: kube-controller-manager
+    kubeEtcd:
+      enabled: true
+      endpoints:
+        - 192.168.0.210
+      service:
+        enabled: true
+        port: 2381
+        targetPort: 2381
+        selector: {}
+      serviceMonitor:
+        enabled: true
+        scheme: http
+        insecureSkipVerify: true
+        interval: 30s
+        scrapeTimeout: 10s
+        tlsConfig:
+          insecureSkipVerify: true
+    kubeScheduler:
+      service:
+        selector:
+          k8s-app: kube-scheduler
+    kube-state-metrics:
+      namespaceOverride: "monitoring"
+    prometheus-node-exporter:
+      namespaceOverride: "monitoring"
+    prometheus:
+      ingress:
+        enabled: true
+        annotations:
+          nginx.ingress.kubernetes.io/ssl-redirect: "true"
+          # external-dns.alpha.kubernetes.io/target: "ruleof3-k8s.sith.network"
+        hosts:
+          - prometheus.sith.network
+        paths:
+        - /
+        tls:
+          - secretName: wildcard-sith-network
+            hosts:
+              - prometheus.sith.network
+      prometheusSpec:
+        storageSpec:
+          volumeClaimTemplate:
+            metadata:
+              name: prometheus-data
+            spec:
+              storageClassName: nfs-client
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 20Gi
