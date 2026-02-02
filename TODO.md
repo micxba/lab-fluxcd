@@ -1,0 +1,23 @@
+# Application to migrate/install/move to FluxCD
+
+- [ ] Alloy
+- [ ] ArgoCD (?)
+- [ ] Argo Events
+- [ ] Argo Workflows
+  - [ ] Workflows
+- [x] Cert-Manager
+- [ ] CNPG
+- [ ] DEX
+- [ ] ~Directus~
+- [ ] External-DNS (Cloudflare)
+- [x] External Secrets
+- [ ] Homer (sith.network homepage) (?)
+- [x] Ingress-NGINX
+- [X] KPS-CRDS
+- [x] KPS
+- [ ] LOKI
+- [x] MetalLB
+- [ ] n8n (?)
+- [x] NFS-Provisioner
+- [ ] Reflector
+- [ ] Vault (?)

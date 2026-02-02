@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: external-dns-cloudflare
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: cloudflare-api-token-secret
+spec:
+  refreshInterval: "60s"
+  secretStoreRef:
+    name: vault-backend-css
+    kind: ClusterSecretStore
+  target:
+    name: bitwarden-secretsmanager
+  data:
+    - secretKey: CLOUDFLARE_API_KEY
+      remoteRef:
+        key: 27b20d57-728f-404f-9542-b3e5013879e7
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: external-dns
+  namespace: external-dns
+spec:
+  interval: 24h
+  url: https://kubernetes-sigs.github.io/external-dns/
+  
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: external-dns-cloudflare
+  namespace: external-dns
+spec:
+  interval: 15m
+  timeout: 5m
+  chart:
+    spec:
+      chart: external-dns
+      version: "1.20.*"
+      sourceRef:
+        kind: HelmRepository
+        name: external-dns
+        namespace: flux-system
+  values:
+    sources:
+      - service
+      - ingress
+    provider: cloudflare
+    dnsConfig: {}
+    cloudflare:
+      secretName: "cloudflare-api-token-secret"
+      proxied: false
+      dnsRecordsPerPage: 100
+    domainFilters:
+      - "sith.network"
+    dryRun: false
+    policy: sync
+    txtOwnerId: "homelab"
+    crd:
+      create: true
+    resourcesPreset: "small"
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+        namespace: "monitoring"
+        labels:
+          release: kps
+    
