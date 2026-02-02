@@ -6,3 +6,4 @@ resources:
   - kps-crds.yaml
   - nfs-provisioner.yaml
   - ./gateway
+  - external-dns-cloudflare.yaml
